@@ -1,0 +1,3 @@
+migrate tables: mvn flyway:migrate
+execute tests: mvn clean flyway:migrate test
+run application: mvn spring-boot:run -Dapplication.environment=dev -Dproject.name=Metrics_API -Dspring.profiles.active=dev
