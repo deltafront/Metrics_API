@@ -9,17 +9,25 @@ import companyB.metrics.api.contract.update.UpdateMetricRequest;
 import companyB.metrics.api.contract.update.UpdateMetricResponse;
 import companyB.metrics.api.data_access.MetricDao;
 import companyB.metrics.api.model.Metric;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements MetricDao
 {
+    @Autowired
+    private CounterService counterService;
+    private final String registeredMetricCount = "registered.metric.count";
     @Override
     public RegisterMetricResponse register(RegisterMetricRequest registerMetricRequest) throws SQLException
     {
@@ -35,6 +43,7 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
                     registerMetricRequest.getTimezone(),guid);
             connection.createStatement().execute(sql);
             registerMetricResponse.setGuid(guid);
+            counterService.increment(registeredMetricCount);
         }
         finally
         {
@@ -85,6 +94,7 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
             else message = String.format("Metric Guid '%s' was not deleted.",guid);
             deleteMetricResponse.setStatus((0==metricDeleted) ? MetricsApiStatus.FAILURE : MetricsApiStatus.SUCCESS);
             deleteMetricResponse.setMessage(message);
+            counterService.decrement(registeredMetricCount);
         }
         finally
         {
@@ -113,6 +123,36 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
             getMetricResponse.setGuid(guid);
         }
         return getMetricResponse;
+    }
+
+    @Override
+    public Integer getCount() throws SQLException
+    {
+        LOGGER.debug("Getting total metrics count.");
+        final AtomicInteger count = new AtomicInteger(0);
+        try(final Connection connection = jdbcSqlConnection.connection())
+        {
+            final String sql = "SELECT COUNT(GUID) FROM Metric";
+            final ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            while (resultSet.next()) count.set(resultSet.getInt(1));
+        }
+        LOGGER.debug(String.format("Returning a count of '%d'.",count.get()));
+        return count.get();
+
+    }
+
+    @Override
+    public List<String> list() throws SQLException
+    {
+        LOGGER.debug("Fetching all of the Guids of registered metrics.");
+        final List<String>guids = new LinkedList<>();
+        try(final Connection connection = jdbcSqlConnection.connection())
+        {
+            final String sql = "SELECT GUID FROM Metric WHERE id !=-1";
+            final ResultSet resultSet = connection.createStatement().executeQuery(sql);
+            while (resultSet.next()) guids.add(resultSet.getString("GUID"));
+        }
+        return guids;
     }
 
 

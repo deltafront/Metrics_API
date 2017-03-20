@@ -5,7 +5,7 @@ import companyB.metrics.api.contract.register.RegisterMetricRequest;
 
 public class MetricTestBase extends TestBase
 {
-    protected RegisterMetricRequest registerMetricRequest()
+    RegisterMetricRequest registerMetricRequest()
     {
         final RegisterMetricRequest registerMetricRequest = new RegisterMetricRequest();
         registerMetricRequest.setName("Foo");

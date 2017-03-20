@@ -23,6 +23,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 @Service
 public class MetricApiService
 {
@@ -147,11 +152,42 @@ public class MetricApiService
         return metricApiResponseUtils.setMessage(insertMetricEntryResponse);
     }
 
+    public List<String> listRegisteredMetricGuids()
+    {
+        final List<String>guids = new LinkedList<>();
+        try
+        {
+            guids.addAll(metricDao.list());
+        }
+        catch (SQLException e)
+        {
+            handleException(e,null);
+        }
+        return guids;
+    }
+
+    public Integer registeredMetricCount()
+    {
+        final AtomicInteger count = new AtomicInteger(0);
+        try
+        {
+            count.set(metricDao.getCount());
+        }
+        catch (SQLException e)
+        {
+            handleException(e,null);
+        }
+        return count.get();
+    }
+
     private void handleException(Exception e, BaseMetricsResponse response)
     {
         final String message = sqlUtils.handleException(e);
-        response.setStatus(MetricsApiStatus.FAILURE);
-        response.setMessage(message);
+        if(null != response)
+        {
+            response.setStatus(MetricsApiStatus.FAILURE);
+            response.setMessage(message);
+        }
         LOGGER.error(message);
     }
 }

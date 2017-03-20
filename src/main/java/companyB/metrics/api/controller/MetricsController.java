@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "metrics")
+@RequestMapping(value = "api/metrics")
 public class MetricsController
 {
     @Autowired

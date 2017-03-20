@@ -9,6 +9,7 @@ import companyB.metrics.api.data_access.MetricsDao;
 import companyB.metrics.api.model.MetricEntry;
 import companyB.metrics.api.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
@@ -25,6 +26,7 @@ public class MetricsDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements M
     private Gson gson = new Gson();
 
     @Override
+    @Cacheable(value = "metrics")
     public ListMetricsResponse list(String guid, String since, String until) throws SQLException
     {
         LOGGER.debug("Getting all Metric Entries for Guid {} from {} until {}.",guid,since,until);

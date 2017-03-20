@@ -9,6 +9,6 @@ import java.sql.SQLException;
 
 public interface MetricsDao
 {
-    public ListMetricsResponse list(String guid, String since, String until) throws SQLException;
-    public InsertMetricEntryResponse insert(InsertMetricEntryRequest insertMetricEntryRequest) throws SQLException;
+    ListMetricsResponse list(String guid, String since, String until) throws SQLException;
+    InsertMetricEntryResponse insert(InsertMetricEntryRequest insertMetricEntryRequest) throws SQLException;
 }

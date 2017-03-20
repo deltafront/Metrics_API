@@ -8,11 +8,14 @@ import companyB.metrics.api.contract.update.UpdateMetricRequest;
 import companyB.metrics.api.contract.update.UpdateMetricResponse;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface MetricDao
 {
-    public RegisterMetricResponse register(RegisterMetricRequest registerMetricRequest) throws SQLException;
-    public UpdateMetricResponse update(String guid, UpdateMetricRequest updateMetricRequest) throws SQLException;
-    public DeleteMetricResponse delete(String guid) throws SQLException;
-    public GetMetricResponse get(String guid) throws SQLException;
+    RegisterMetricResponse register(RegisterMetricRequest registerMetricRequest) throws SQLException;
+    UpdateMetricResponse update(String guid, UpdateMetricRequest updateMetricRequest) throws SQLException;
+    DeleteMetricResponse delete(String guid) throws SQLException;
+    GetMetricResponse get(String guid) throws SQLException;
+    Integer getCount() throws SQLException;
+    List<String> list() throws SQLException;
 }
