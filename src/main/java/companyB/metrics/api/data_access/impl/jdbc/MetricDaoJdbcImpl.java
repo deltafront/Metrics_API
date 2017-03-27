@@ -34,14 +34,14 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
         LOGGER.debug("Registering new Metric.");
         final RegisterMetricResponse registerMetricResponse = new RegisterMetricResponse();
         registerMetricResponse.setStatus(MetricsApiStatus.SUCCESS);
-        try(final Connection connection = jdbcSqlConnection.connection())
+        final UUID uuid = UUID.randomUUID();
+        final String guid = uuid.toString();
+        final String sql = composeRegisterMetricSql(registerMetricRequest, guid);
+        try(
+                final Connection connection = jdbcSqlConnection.connection();
+                final Statement statement = connection.createStatement())
         {
-            final UUID uuid = UUID.randomUUID();
-            final String guid = uuid.toString();
-            final String sql = String.format("INSERT INTO Metric(NAME,CONTACT_NAME,CONTACT_EMAIL,TIMEZONE,GUID) VALUES ('%s','%s','%s','%s', '%s')",registerMetricRequest.getName(),
-                    registerMetricRequest.getContactName(), registerMetricRequest.getContactEmail(),
-                    registerMetricRequest.getTimezone(),guid);
-            connection.createStatement().execute(sql);
+            statement.execute(sql);
             registerMetricResponse.setGuid(guid);
             counterService.increment(registeredMetricCount);
         }
@@ -51,6 +51,12 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
         }
 
         return registerMetricResponse;
+    }
+    private String composeRegisterMetricSql(RegisterMetricRequest registerMetricRequest, String guid)
+    {
+        return String.format("INSERT INTO Metric(NAME,CONTACT_NAME,CONTACT_EMAIL,TIMEZONE,GUID) VALUES ('%s','%s','%s','%s', '%s')",registerMetricRequest.getName(),
+                registerMetricRequest.getContactName(), registerMetricRequest.getContactEmail(),
+                registerMetricRequest.getTimezone(),guid);
     }
 
     @Override
@@ -82,11 +88,12 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
         final DeleteMetricResponse deleteMetricResponse = new DeleteMetricResponse();
         deleteMetricResponse.setGuid(guid);
         deleteMetricResponse.setStatus(MetricsApiStatus.SUCCESS);
-        try(final Connection connection = jdbcSqlConnection.connection())
+        try(
+                final Connection connection = jdbcSqlConnection.connection();
+                final Statement statement = connection.createStatement())
         {
             final String deleteMetricSql = String.format("DELETE FROM Metric WHERE GUID='%s'",guid);
             final String deleteMetricEntriesSql = String.format("DELETE FROM MetricEntry WHERE METRIC_GUID='%s'",guid);
-            final Statement statement = connection.createStatement();
             final int deleted = statement.executeUpdate(deleteMetricEntriesSql);
             final int metricDeleted = statement.executeUpdate(deleteMetricSql);
             String message;

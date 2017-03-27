@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +33,12 @@ public class MetricsDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements M
         LOGGER.debug("Getting all Metric Entries for Guid {} from {} until {}.",guid,since,until);
         final ListMetricsResponse listMetricsResponse = new ListMetricsResponse();
         listMetricsResponse.setStatus(MetricsApiStatus.SUCCESS);
-        final Long sinceTimestamp = dateUtils.toTimestamp(since);
-        final Long untilTimestamp = dateUtils.toTimestamp(until);
-        try(final Connection connection = jdbcSqlConnection.connection())
+        final String sql = composeListMetricsSql(guid, since, until);
+        try(
+                final Connection connection = jdbcSqlConnection.connection();
+                final Statement statement = connection.createStatement();
+                final ResultSet resultSet = statement.executeQuery(sql))
         {
-            final String sql = String.format("SELECT * FROM MetricEntry WHERE METRIC_GUID='%s' AND ENTRY_TIMESTAMP>=%s AND ENTRY_TIMESTAMP<=%s",
-                    guid, sinceTimestamp, untilTimestamp);
-            final ResultSet resultSet = connection.createStatement().executeQuery(sql);
             while(resultSet.next())listMetricsResponse.getMetricsEntries().add(fromResultSet(resultSet));
         }
         finally
@@ -48,20 +48,19 @@ public class MetricsDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements M
         return listMetricsResponse;
     }
 
+
     @Override
     public InsertMetricEntryResponse insert(InsertMetricEntryRequest insertMetricEntryRequest) throws SQLException
     {
+        LOGGER.debug("Inserting new Metric Entry for GUID {} ({})",insertMetricEntryRequest.getGuid(),
+                insertMetricEntryRequest.getMetricEntry().getEntryDate());
         final InsertMetricEntryResponse insertMetricEntryResponse = new InsertMetricEntryResponse();
-        try(final Connection connection = jdbcSqlConnection.connection())
+        final String sql = composeMethodEntryInsertionSql(insertMetricEntryRequest);
+        try(
+                final Connection connection = jdbcSqlConnection.connection();
+                final Statement statement = connection.createStatement())
         {
-            final Long timestampFromEntry = insertMetricEntryRequest.getMetricEntry().getEntryTimestamp();
-            final String dateEnteredFromEntry = insertMetricEntryRequest.getMetricEntry().getEntryDate();
-            final Long timestamp  = (null == timestampFromEntry) ? System.currentTimeMillis() : timestampFromEntry;
-            final String dateEntered  = (null == dateEnteredFromEntry) ? dateUtils.fromTimestamp(timestamp) : dateEnteredFromEntry;
-            final String attributes = gson.toJson(insertMetricEntryRequest.getMetricEntry().getAttributes());
-            final String sql = String.format("INSERT INTO MetricEntry (ENTRY_TIMESTAMP,ENTRY_DATE,ATTRIBUTES,METRIC_GUID) VALUES (%s,'%s','%s','%s')",
-                    timestamp,dateEntered,attributes,insertMetricEntryRequest.getGuid());
-            connection.createStatement().execute(sql);
+            statement.execute(sql);
             insertMetricEntryResponse.setStatus(MetricsApiStatus.SUCCESS);
         }
         finally
@@ -70,22 +69,35 @@ public class MetricsDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements M
         }
         return insertMetricEntryResponse;
     }
-    private MetricEntry fromResultSet(ResultSet resultSet)
+
+    private String composeListMetricsSql(String guid, String since, String until)
+    {
+        final Long sinceTimestamp = dateUtils.toTimestamp(since);
+        final Long untilTimestamp = dateUtils.toTimestamp(until);
+        return String.format("SELECT * FROM MetricEntry WHERE METRIC_GUID='%s' AND ENTRY_TIMESTAMP>=%s AND ENTRY_TIMESTAMP<=%s",
+                guid, sinceTimestamp, untilTimestamp);
+    }
+    private String composeMethodEntryInsertionSql(InsertMetricEntryRequest insertMetricEntryRequest)
+    {
+        final Long timestampFromEntry = insertMetricEntryRequest.getMetricEntry().getEntryTimestamp();
+        final String dateEnteredFromEntry = insertMetricEntryRequest.getMetricEntry().getEntryDate();
+        final Long timestamp  = (null == timestampFromEntry) ? System.currentTimeMillis() : timestampFromEntry;
+        final String dateEntered  = (null == dateEnteredFromEntry) ? dateUtils.fromTimestamp(timestamp) : dateEnteredFromEntry;
+        final String attributes = gson.toJson(insertMetricEntryRequest.getMetricEntry().getAttributes());
+        return String.format("INSERT INTO MetricEntry (ENTRY_TIMESTAMP,ENTRY_DATE,ATTRIBUTES,METRIC_GUID) VALUES (%s,'%s','%s','%s')",
+                timestamp,dateEntered,attributes,insertMetricEntryRequest.getGuid());
+    }
+
+    private MetricEntry fromResultSet(ResultSet resultSet) throws SQLException
     {
         final MetricEntry metricEntry = new MetricEntry();
-        try
-        {
-            final String attributes = resultSet.getString("ATTRIBUTES");
-            Map<String,Object>attributesMapping = new HashMap<>();
-            attributesMapping = gson.fromJson(attributes,attributesMapping.getClass());
-            metricEntry.setAttributes(attributesMapping);
-            metricEntry.setEntryTimestamp(resultSet.getLong("ENTRY_TIMESTAMP"));
-            metricEntry.setEntryDate(resultSet.getString("ENTRY_DATE"));
-            metricEntry.setId(resultSet.getLong("ID"));
-        } catch (SQLException e)
-        {
-            sqlUtils.handleSqlException(e);
-        }
+        final String attributes = resultSet.getString("ATTRIBUTES");
+        Map<String,Object>attributesMapping = new HashMap<>();
+        attributesMapping = gson.fromJson(attributes,attributesMapping.getClass());
+        metricEntry.setAttributes(attributesMapping);
+        metricEntry.setEntryTimestamp(resultSet.getLong("ENTRY_TIMESTAMP"));
+        metricEntry.setEntryDate(resultSet.getString("ENTRY_DATE"));
+        metricEntry.setId(resultSet.getLong("ID"));
         return metricEntry;
     }
 

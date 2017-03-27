@@ -48,7 +48,6 @@ public class ListMetricsResponse extends BaseMetricsResponse
     {
         final List<MetricEntry>metrics = new LinkedList<>();
         this.metricsEntries = gson.fromJson(metricsJson,metrics.getClass());
-
     }
 
     @Override

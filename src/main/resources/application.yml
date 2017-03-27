@@ -23,3 +23,5 @@ info:
     orginization: CompanyB
     lead: Charles Burrell III
     email: deltafront@gmail.com
+flyway:
+  locations: filesystem:src/main/resources/db/migration/dev

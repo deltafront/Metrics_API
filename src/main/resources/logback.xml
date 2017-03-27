@@ -15,7 +15,7 @@
     </appender>
 
     <logger name="org.springframework" level="ERROR" />
-    <logger name="companyB.metrics.api" level="DEBUG"/>
+    <logger name="companyB.metrics.api" level="INFO"/>
     <logger name="com.mongofactory" level="ERROR" />
     <logger name="org.jboss" level="ERROR" />
     <logger name="springfox" level="ERROR" />
