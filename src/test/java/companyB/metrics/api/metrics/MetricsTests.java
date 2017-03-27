@@ -67,13 +67,13 @@ public class MetricsTests extends TestBase
     public void getSince()
     {
         final String since = getDateFromTimestamp(sinceDayTimestamp);
-        doTest(guid,since,null,(upper - sinceDay));
+        doTest(guid,since,null,(upper - sinceDay + 1));
     }
     @Test
     public void getUntil()
     {
         final String until = getDateFromTimestamp(untilDayTimestamp);
-        doTest(guid,null,until,untilDay);
+        doTest(guid,null,until,untilDay - 1);
     }
     @Test
     public void getSinceUntil()
