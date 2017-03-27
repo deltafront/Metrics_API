@@ -1,6 +1,7 @@
 package companyB.metrics.api;
 
 
+import companyB.metrics.api.service.FlywayService;
 import companyB.metrics.api.service.MetricApiService;
 import companyB.metrics.api.utils.DateUtils;
 import companyB.metrics.api.utils.JdbcSqlConnection;
@@ -10,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 public class TestBase
 {
@@ -22,5 +23,20 @@ public class TestBase
     protected JdbcSqlConnection jdbcSqlConnection;
     @Autowired
     protected SqlUtils sqlUtils;
+    @Autowired
+    protected FlywayService flywayService;
+
+    private static Boolean migrated = false;
+
+    //@Before
+    public void beforeMaster()
+    {
+        if(!migrated)
+        {
+            flywayService.migrate();
+            migrated = true;
+        }
+    }
+
 }
 
