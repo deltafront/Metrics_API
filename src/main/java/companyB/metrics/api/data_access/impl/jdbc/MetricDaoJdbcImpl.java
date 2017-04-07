@@ -31,7 +31,6 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
     @Override
     public RegisterMetricResponse register(RegisterMetricRequest registerMetricRequest) throws SQLException
     {
-        LOGGER.debug("Registering new Metric.");
         final RegisterMetricResponse registerMetricResponse = new RegisterMetricResponse();
         registerMetricResponse.setStatus(MetricsApiStatus.SUCCESS);
         final UUID uuid = UUID.randomUUID();
@@ -62,7 +61,6 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
     @Override
     public UpdateMetricResponse update(String guid, UpdateMetricRequest updateMetricRequest) throws SQLException
     {
-        LOGGER.debug("Updating existing Metric");
         final UpdateMetricResponse updateMetricResponse = new UpdateMetricResponse();
         updateMetricResponse.setStatus(MetricsApiStatus.SUCCESS);
         try(final Connection connection = jdbcSqlConnection.connection())
@@ -84,7 +82,6 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
     @Override
     public DeleteMetricResponse delete(String guid) throws SQLException
     {
-        LOGGER.debug("Deleting existing Metric");
         final DeleteMetricResponse deleteMetricResponse = new DeleteMetricResponse();
         deleteMetricResponse.setGuid(guid);
         deleteMetricResponse.setStatus(MetricsApiStatus.SUCCESS);
@@ -113,7 +110,6 @@ public class MetricDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements Me
     @Override
     public GetMetricResponse get(String guid) throws SQLException
     {
-        LOGGER.debug("Fetching existing Metric");
         final GetMetricResponse getMetricResponse = new GetMetricResponse();
         try(final Connection connection = jdbcSqlConnection.connection())
         {

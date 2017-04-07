@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class BaseMetricJdbcApiDataAccess
 {
-    protected final Logger LOGGER = LoggerFactory.getLogger(BaseMetricJdbcApiDataAccess.class);
+    final Logger LOGGER = LoggerFactory.getLogger(BaseMetricJdbcApiDataAccess.class);
     @Autowired
     protected JdbcSqlConnection jdbcSqlConnection;
     @Autowired

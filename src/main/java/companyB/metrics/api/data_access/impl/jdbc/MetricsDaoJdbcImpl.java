@@ -30,7 +30,6 @@ public class MetricsDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements M
     @Cacheable(value = "metrics")
     public ListMetricsResponse list(String guid, String since, String until) throws SQLException
     {
-        LOGGER.debug("Getting all Metric Entries for Guid {} from {} until {}.",guid,since,until);
         final ListMetricsResponse listMetricsResponse = new ListMetricsResponse();
         listMetricsResponse.setStatus(MetricsApiStatus.SUCCESS);
         final String sql = composeListMetricsSql(guid, since, until);
@@ -52,8 +51,6 @@ public class MetricsDaoJdbcImpl extends BaseMetricJdbcApiDataAccess implements M
     @Override
     public InsertMetricEntryResponse insert(InsertMetricEntryRequest insertMetricEntryRequest) throws SQLException
     {
-        LOGGER.debug("Inserting new Metric Entry for GUID {} ({})",insertMetricEntryRequest.getGuid(),
-                insertMetricEntryRequest.getMetricEntry().getEntryDate());
         final InsertMetricEntryResponse insertMetricEntryResponse = new InsertMetricEntryResponse();
         final String sql = composeMethodEntryInsertionSql(insertMetricEntryRequest);
         try(
