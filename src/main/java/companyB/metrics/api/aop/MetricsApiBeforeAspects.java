@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class MetricServiceBeforeAspects
+public class MetricsApiBeforeAspects
 {
     private final Logger LOGGER = LoggerFactory.getLogger(MetricApiService.class);
 

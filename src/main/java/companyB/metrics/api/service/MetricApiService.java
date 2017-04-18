@@ -1,5 +1,6 @@
 package companyB.metrics.api.service;
 
+import companyB.metrics.api.cache.MetricsCache;
 import companyB.metrics.api.contract.BaseMetricsResponse;
 import companyB.metrics.api.contract.MetricsApiStatus;
 import companyB.metrics.api.contract.delete.DeleteMetricResponse;
@@ -13,13 +14,12 @@ import companyB.metrics.api.contract.update.UpdateMetricRequest;
 import companyB.metrics.api.contract.update.UpdateMetricResponse;
 import companyB.metrics.api.data_access.MetricDao;
 import companyB.metrics.api.data_access.MetricsDao;
+import companyB.metrics.api.model.MetricEntry;
 import companyB.metrics.api.utils.DateUtils;
 import companyB.metrics.api.utils.MetricApiResponseUtils;
 import companyB.metrics.api.utils.SqlUtils;
 import companyB.metrics.api.utils.ValidationUtils;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +43,8 @@ public class MetricApiService
     private SqlUtils sqlUtils;
     @Autowired
     private DateUtils dateUtils;
-
-    private final Logger LOGGER = LoggerFactory.getLogger(MetricApiService.class);
+    @Autowired
+    private MetricsCache cache;
 
     public GetMetricResponse get(String guid)
     {
@@ -125,7 +125,15 @@ public class MetricApiService
         listMetricsResponse.setGuid(guid);
         try
         {
-            listMetricsResponse = metricsDao.list(guid,sinceString,untilString);
+            final List<MetricEntry>metricEntries  = cache.get(guid,since,until);
+            if(null != metricEntries)
+                listMetricsResponse.setMetricsEntries(metricEntries);
+            else
+            {
+                listMetricsResponse = metricsDao.list(guid,sinceString,untilString);
+                cache.set(listMetricsResponse.getMetricsEntries(),guid,untilTimestamp,untilTimestamp);
+            }
+
         }
         catch (Exception e)
         {
@@ -188,6 +196,5 @@ public class MetricApiService
             response.setStatus(MetricsApiStatus.FAILURE);
             response.setMessage(message);
         }
-        LOGGER.error(message);
     }
 }

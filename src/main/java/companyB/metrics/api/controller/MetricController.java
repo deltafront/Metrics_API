@@ -29,8 +29,7 @@ public class MetricController
             produces = "application/json")
     @ApiResponses(@ApiResponse(code = 201, response = RegisterMetricResponse.class, message = "Metric inserted? [TRUE/FALSE]."))
     @RequestMapping(method = RequestMethod.POST, value = "")
-    public @ResponseBody
-    RegisterMetricResponse register(@RequestBody RegisterMetricRequest registerMetricRequest)
+    public @ResponseBody RegisterMetricResponse register(@RequestBody RegisterMetricRequest registerMetricRequest)
     {
         return metricApiService.register(registerMetricRequest);
     }
