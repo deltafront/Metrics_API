@@ -14,6 +14,7 @@ import companyB.metrics.api.contract.update.UpdateMetricRequest;
 import companyB.metrics.api.contract.update.UpdateMetricResponse;
 import companyB.metrics.api.data_access.MetricDao;
 import companyB.metrics.api.data_access.MetricsDao;
+import companyB.metrics.api.model.Metric;
 import companyB.metrics.api.model.MetricEntry;
 import companyB.metrics.api.utils.DateUtils;
 import companyB.metrics.api.utils.MetricApiResponseUtils;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -48,39 +50,43 @@ public class MetricApiService
 
     public GetMetricResponse get(String guid)
     {
-        GetMetricResponse getMetricResponse = new GetMetricResponse();
+        final GetMetricResponse getMetricResponse = new GetMetricResponse();
         try
         {
             Validate.notBlank(guid, "Metric Guid must be provided.");
             getMetricResponse.setGuid(guid);
-            getMetricResponse = metricDao.get(guid);
+            final Metric metric = metricDao.get(guid);
+            getMetricResponse.setMetric(metric);
         }
         catch (Exception e)
         {
             handleException(e,getMetricResponse);
         }
-        getMetricResponse.setGuid(guid);
+        metricApiResponseUtils.setResponseStatus(getMetricResponse,null != getMetricResponse.getMetric());
         return metricApiResponseUtils.setMessage(getMetricResponse);
     }
     public RegisterMetricResponse register(RegisterMetricRequest registerMetricRequest)
     {
-        RegisterMetricResponse registerMetricResponse = new RegisterMetricResponse();
+        final RegisterMetricResponse registerMetricResponse = new RegisterMetricResponse();
+        registerMetricResponse.setName(registerMetricRequest.getName());
         try
         {
             registerMetricRequest.validate();
             final String email = registerMetricRequest.getContactEmail();
             Validate.isTrue(validationUtils.validateEmail(email),String.format("Email '%s' is not valid.",email));
-            registerMetricResponse = metricDao.register(registerMetricRequest);
+            registerMetricResponse.setGuid(metricDao.register(registerMetricRequest));
         }
         catch (Exception e)
         {
             handleException(e,registerMetricResponse);
         }
+        metricApiResponseUtils.setResponseStatus(registerMetricResponse,null != registerMetricResponse.getGuid());
         return metricApiResponseUtils.setMessage(registerMetricResponse);
     }
     public UpdateMetricResponse update(String guid, UpdateMetricRequest updateMetricRequest)
     {
-        UpdateMetricResponse updateMetricResponse = new UpdateMetricResponse();
+        final UpdateMetricResponse updateMetricResponse = new UpdateMetricResponse();
+        final AtomicBoolean updated = new AtomicBoolean(false);
         try
         {
             Validate.notBlank(guid, "Metric Guid must be provided.");
@@ -89,28 +95,31 @@ public class MetricApiService
             Validate.isTrue(validationUtils.validateEmail(email),String.format("Email '%s' is not valid.",email));
             updateMetricResponse.setGuid(guid);
             updateMetricResponse.setName(updateMetricRequest.getName());
-            updateMetricResponse = metricDao.update(guid,updateMetricRequest);
+            updated.set(metricDao.update(guid,updateMetricRequest));
+            updateMetricResponse.setStatus( updated.get() ? MetricsApiStatus.SUCCESS  : MetricsApiStatus.FAILURE);
         }
         catch (Exception e)
         {
             handleException(e,updateMetricResponse);
         }
+        metricApiResponseUtils.setResponseStatus(updateMetricResponse,updated.get());
         return metricApiResponseUtils.setMessage(updateMetricResponse);
     }
     public DeleteMetricResponse delete(String guid)
     {
-        DeleteMetricResponse deleteMetricResponse = new DeleteMetricResponse();
+        final DeleteMetricResponse deleteMetricResponse = new DeleteMetricResponse();
+        final AtomicBoolean deleted = new AtomicBoolean(false);
         try
         {
             Validate.notBlank(guid, "Metric Guid must be provided.");
             deleteMetricResponse.setGuid(guid);
-            deleteMetricResponse = metricDao.delete(guid);
+            deleted.set(metricDao.delete(guid));
         }
         catch (Exception e)
         {
             handleException(e,deleteMetricResponse);
         }
-
+        metricApiResponseUtils.setResponseStatus(deleteMetricResponse,deleted.get());
         return metricApiResponseUtils.setMessage(deleteMetricResponse);
     }
     public ListMetricsResponse list(String guid, String since, String until)

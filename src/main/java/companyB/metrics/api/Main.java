@@ -1,5 +1,6 @@
 package companyB.metrics.api;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ResourceBanner;
 import org.springframework.boot.SpringApplication;
@@ -9,6 +10,7 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.jdbc.core.JdbcTemplate;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiInfo;
@@ -27,7 +29,7 @@ public class Main extends SpringBootServletInitializer
     private String password;
     @Value("${jdbc.url}")
     private String url;
-    @Value("${jdbc.driverManager")
+    @Value("${jdbc.driverManager}")
     private String driverManager;
     @Value("${api.version}")
     private String apiVersion;
@@ -65,6 +67,16 @@ public class Main extends SpringBootServletInitializer
                 .apiInfo(apiInfo());
     }
 
+    @Bean
+    public JdbcTemplate jdbcTemplate()
+    {
+        final BasicDataSource dataSource = new BasicDataSource();
+        dataSource.setDriverClassName(driverManager);
+        dataSource.setUrl(url);
+        dataSource.setPassword(password);
+        dataSource.setUsername(username);
+        return new JdbcTemplate(dataSource);
+    }
     private ApiInfo apiInfo() {
         return new ApiInfo(
                 apiTitle,

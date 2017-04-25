@@ -66,6 +66,10 @@ public class MetricApiResponseUtils
                         updateMetricResponse.getStatus().equals(MetricsApiStatus.SUCCESS)),RequestType.Metric,Operation.Update);
     }
 
+    public <T extends BaseMetricsResponse> void setResponseStatus(T baseMetricsResponse, Boolean condition)
+    {
+        baseMetricsResponse.setStatus( condition ? MetricsApiStatus.SUCCESS : MetricsApiStatus.FAILURE);
+    }
     private <T extends BaseMetricsResponse> T setMessage(T baseMetricsResponse, String message, RequestType requestType, Operation operation)
     {
         final String fromResponse = baseMetricsResponse.getMessage();
