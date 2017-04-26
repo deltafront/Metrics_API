@@ -2,7 +2,6 @@ package companyB.metrics.api.metrics;
 
 import companyB.metrics.api.TestBase;
 import companyB.metrics.api.contract.MetricsApiStatus;
-import companyB.metrics.api.contract.delete.DeleteMetricResponse;
 import companyB.metrics.api.contract.insert.InsertMetricEntryRequest;
 import companyB.metrics.api.contract.insert.InsertMetricEntryResponse;
 import companyB.metrics.api.contract.list.ListMetricsResponse;
@@ -13,7 +12,6 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,16 +51,7 @@ public class MetricsTests extends TestBase
         untilDayTimestamp = getTimestamp(untilDay);
         dateTimeFormatter = DateTimeFormat.forPattern(dateTimeFormat);
     }
-    @After
-    public void after()
-    {
-        final DeleteMetricResponse deleteMetricResponse = metricApiService.delete(guid);
-        assertNotNull(deleteMetricResponse);
-        assertEquals(MetricsApiStatus.SUCCESS, deleteMetricResponse.getStatus());
-        final ListMetricsResponse listMetricsResponse = metricApiService.list(guid,null,null);
-        assertNotNull(listMetricsResponse);
-        assertEquals(0,listMetricsResponse.getMetricsEntries().size());
-    }
+
     @Test
     public void getSince()
     {

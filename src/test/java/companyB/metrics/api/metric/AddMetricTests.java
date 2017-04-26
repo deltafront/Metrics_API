@@ -3,7 +3,6 @@ package companyB.metrics.api.metric;
 import companyB.metrics.api.contract.MetricsApiStatus;
 import companyB.metrics.api.contract.register.RegisterMetricRequest;
 import companyB.metrics.api.contract.register.RegisterMetricResponse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,22 +12,22 @@ import static junit.framework.Assert.*;
 public class AddMetricTests extends MetricTestBase
 {
     private RegisterMetricRequest registerMetricRequest;
-    private String guid;
 
     @Before
     public void before()
     {
        registerMetricRequest = registerMetricRequest();
     }
-    @After
-    public void after()
-    {
-        if(null != guid)metricApiService.delete(guid);
-    }
     @Test
     public void happyPath()
     {
         doTest(registerMetricRequest,true);
+    }
+    @Test
+    public void addTwice()
+    {
+        doTest(registerMetricRequest,true);
+        doTest(registerMetricRequest,false);
     }
     @Test
     public void nullName()
@@ -91,6 +90,5 @@ public class AddMetricTests extends MetricTestBase
         if(successExpected)assertNotNull(registerMetricResponse.getGuid());
         else assertNull(registerMetricResponse.getGuid());
         assertEquals(expected, registerMetricResponse.getStatus());
-        guid = registerMetricResponse.getGuid();
     }
 }

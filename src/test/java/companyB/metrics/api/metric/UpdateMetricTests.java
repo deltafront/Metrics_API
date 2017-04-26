@@ -7,7 +7,6 @@ import companyB.metrics.api.contract.update.UpdateMetricRequest;
 import companyB.metrics.api.contract.update.UpdateMetricResponse;
 import companyB.metrics.api.model.Metric;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,11 +30,7 @@ public class UpdateMetricTests extends MetricTestBase
         updateMetricRequest.setTimezone(registerMetricRequest.getTimezone());
         updateMetricRequest.setName(registerMetricRequest.getName());
     }
-    @After
-    public void after()
-    {
-        if(null != guid)metricApiService.delete(guid);
-    }
+
     @Test
     public void changeName()
     {

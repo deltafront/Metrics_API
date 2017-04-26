@@ -67,6 +67,12 @@ public class MetricDaoJbdcTemplateImpl extends BaseMetricJdbcTemplateApiDataAcce
         LOGGER.debug(String.format("Returning a count of '%d'.",count.get()));
         return count.get();
     }
+    @Override
+    public void clear()
+    {
+        jdbcTemplate.update("DELETE FROM MetricEntry WHERE ID > -1");
+        jdbcTemplate.update("DELETE FROM Metric WHERE ID > -1");
+    }
 
     @Override
     public List<String> list() throws SQLException

@@ -29,7 +29,7 @@ public class MetricsApiBeforeAspects
     argNames = "registerMetricRequest")
     public void register(RegisterMetricRequest registerMetricRequest)
     {
-        LOGGER.info("Attempting to register Metric '{}' to {}.",registerMetricRequest.getName(), registerMetricRequest.getName());
+        LOGGER.info("Provider=AOP Operation=RegisterMetric Name={} ContactName={}",registerMetricRequest.getName(), registerMetricRequest.getContactName());
         increment("counter.register.metric.attempt");
     }
 
@@ -37,7 +37,7 @@ public class MetricsApiBeforeAspects
             argNames = "guid,updateMetricRequest")
     public void update(String guid,UpdateMetricRequest updateMetricRequest)
     {
-        LOGGER.info("Attempting to update Metric GUID '{}' to {}.",guid);
+        LOGGER.info("Provider=AOP Operation=UpdateMetric Guid={}",guid);
         increment("counter.update.metric.%s.attempts",guid);
     }
 
@@ -45,7 +45,7 @@ public class MetricsApiBeforeAspects
             argNames = "guid")
     public void delete(String guid)
     {
-        LOGGER.info("Attempting to delete Metric GUID '{}' and all associated entries.",guid);
+        LOGGER.info("Provider=AOP Operation=DeleteMetric Guid={}",guid);
         increment("counter.delete.metric.%s.attempts",guid);
     }
 
@@ -53,7 +53,7 @@ public class MetricsApiBeforeAspects
             argNames = "guid")
     public void get(String guid)
     {
-        LOGGER.info("Attempting to get Metric GUID '{}'.",guid);
+        LOGGER.info("Provider=AOP Operation=GetMetric Guid={}",guid);
         increment("counter.get.metric.%s.attempts",guid);
     }
     @Before(value = "execution(* companyB.metrics.api.service.MetricApiService.list(java.lang.String, java.lang.String, java.lang.String)) && args(guid,since,until)",
@@ -65,14 +65,14 @@ public class MetricsApiBeforeAspects
         final String sinceString = dateUtils.fromTimestamp(sinceTimestamp);
         final String untilString = dateUtils.fromTimestamp(untilTimestamp);
         increment("counter.list.metrics.%s.%s.%s.attempts",guid,since,until);
-        LOGGER.info("Attempting to list all Metrics for Metric GUID '{}' since {} until {}.",guid,sinceString,untilString);
+        LOGGER.info("Provider=AOP Operation=ListMetricEntries Guid={} From={} Until={}.",guid,sinceString,untilString);
     }
 
     @Before(value = "execution(* companyB.metrics.api.service.MetricApiService.insert(companyB.metrics.api.contract.insert.InsertMetricEntryRequest)) && args(insertMetricEntryRequest)",
             argNames = "insertMetricEntryRequest")
     public void insert(InsertMetricEntryRequest insertMetricEntryRequest)
     {
-        LOGGER.info("Attempting to insert entry for Metric GUID'{}'.",insertMetricEntryRequest.getGuid());
+        LOGGER.info("Provider=AOP Operation=InsertMetricEntry MetricGuid={}",insertMetricEntryRequest.getGuid());
         increment("counter.insert.metric.entry.%s.attempts",insertMetricEntryRequest.getGuid());
     }
 

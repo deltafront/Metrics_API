@@ -2,7 +2,6 @@ package companyB.metrics.api.metric;
 
 import companyB.metrics.api.contract.MetricsApiStatus;
 import companyB.metrics.api.contract.delete.DeleteMetricResponse;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,11 +16,6 @@ public class DeleteMetricTests extends MetricTestBase
     public void before()
     {
         guid = metricApiService.register(registerMetricRequest()).getGuid();
-    }
-    @After
-    public void after()
-    {
-        metricApiService.delete(guid);
     }
     @Test
     public void happyPath()

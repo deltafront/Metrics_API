@@ -128,31 +128,29 @@ public class MetricApiService
         final Long untilTimestamp = dateUtils.toTimestamp(until);
         final String sinceString = dateUtils.fromTimestamp(sinceTimestamp);
         final String untilString = dateUtils.fromTimestamp(untilTimestamp);
-        ListMetricsResponse listMetricsResponse = new ListMetricsResponse();
+        final ListMetricsResponse listMetricsResponse = new ListMetricsResponse();
         listMetricsResponse.setSince(sinceString);
         listMetricsResponse.setUntil(untilString);
         listMetricsResponse.setGuid(guid);
         try
         {
-            final List<MetricEntry>metricEntries  = cache.get(guid,since,until);
-            if(null != metricEntries)
-                listMetricsResponse.setMetricsEntries(metricEntries);
-            else
-            {
-                listMetricsResponse = metricsDao.list(guid,sinceString,untilString);
-                cache.set(listMetricsResponse.getMetricsEntries(),guid,untilTimestamp,untilTimestamp);
-            }
-
+            List<MetricEntry> metricEntries = cache.get(guid, since, until);
+            if (null == metricEntries || metricEntries.isEmpty())
+                metricEntries = metricsDao.list(guid, sinceString, untilString);
+            listMetricsResponse.setMetricsEntries(metricEntries);
+            cache.set(listMetricsResponse.getMetricsEntries(), guid, untilTimestamp, untilTimestamp);
         }
         catch (Exception e)
         {
             handleException(e,listMetricsResponse);
         }
+        metricApiResponseUtils.setResponseStatus(listMetricsResponse,null != listMetricsResponse.getMetricsEntries());
         return metricApiResponseUtils.setMessage(listMetricsResponse);
     }
     public InsertMetricEntryResponse insert(InsertMetricEntryRequest insertMetricEntryRequest)
     {
-        InsertMetricEntryResponse insertMetricEntryResponse = new InsertMetricEntryResponse();
+        final InsertMetricEntryResponse insertMetricEntryResponse = new InsertMetricEntryResponse();
+        final AtomicBoolean inserted = new AtomicBoolean(false);
         try
         {
             insertMetricEntryRequest.validate();
@@ -160,12 +158,13 @@ public class MetricApiService
             Validate.isTrue(validationUtils.validateDateString(entryDate),"Date Entered (%s) is not in 'YYYY-MM-DD'T'HH:mm:ss:SSS' format.");
             final String guid = insertMetricEntryRequest.getGuid();
             insertMetricEntryResponse.setGuid(guid);
-            insertMetricEntryResponse = metricsDao.insert(insertMetricEntryRequest);
+            inserted.set(metricsDao.insert(insertMetricEntryRequest));
         }
         catch (Exception e)
         {
             handleException(e,insertMetricEntryResponse);
         }
+        metricApiResponseUtils.setResponseStatus(insertMetricEntryResponse,inserted.get());
         return metricApiResponseUtils.setMessage(insertMetricEntryResponse);
     }
 
@@ -195,6 +194,10 @@ public class MetricApiService
             handleException(e,null);
         }
         return count.get();
+    }
+    public void clear()
+    {
+        metricDao.clear();
     }
 
     private void handleException(Exception e, BaseMetricsResponse response)

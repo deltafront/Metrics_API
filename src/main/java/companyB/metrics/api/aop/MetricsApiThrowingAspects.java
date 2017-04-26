@@ -42,7 +42,8 @@ public class MetricsApiThrowingAspects
 
     private void log(JoinPoint joinPoint, SQLException e, Logger logger)
     {
-        logger.error(sqlUtils.handleSqlException(e),e);
+        final String message = String.format("Provider=AOP[ERROR] Message=%s",sqlUtils.handleException(e));
+        logger.error(message,e);
         counterService.increment(String.format("counter.%s.errors",joinPoint.getSignature().getName()));
     }
 

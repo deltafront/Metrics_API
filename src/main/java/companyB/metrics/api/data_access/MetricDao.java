@@ -15,4 +15,5 @@ public interface MetricDao
     Metric get(String guid) throws SQLException;
     Integer getCount() throws SQLException;
     List<String> list() throws SQLException;
+    void clear();
 }

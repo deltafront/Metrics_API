@@ -2,13 +2,13 @@ package companyB.metrics.api.data_access;
 
 
 import companyB.metrics.api.contract.insert.InsertMetricEntryRequest;
-import companyB.metrics.api.contract.insert.InsertMetricEntryResponse;
-import companyB.metrics.api.contract.list.ListMetricsResponse;
+import companyB.metrics.api.model.MetricEntry;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public interface MetricsDao
 {
-    ListMetricsResponse list(String guid, String since, String until) throws SQLException;
-    InsertMetricEntryResponse insert(InsertMetricEntryRequest insertMetricEntryRequest) throws SQLException;
+    List<MetricEntry> list(String guid, String since, String until) throws SQLException;
+    Boolean insert(InsertMetricEntryRequest insertMetricEntryRequest) throws SQLException;
 }

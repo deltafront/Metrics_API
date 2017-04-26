@@ -6,6 +6,8 @@ import companyB.metrics.api.service.MetricApiService;
 import companyB.metrics.api.utils.DateUtils;
 import companyB.metrics.api.utils.JdbcSqlConnection;
 import companyB.metrics.api.utils.SqlUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,7 +30,7 @@ public class TestBase
 
     private static Boolean migrated = false;
 
-    //@Before
+    @Before
     public void beforeMaster()
     {
         if(!migrated)
@@ -37,6 +39,12 @@ public class TestBase
             migrated = true;
         }
     }
+    @After
+    public void after()
+    {
+        metricApiService.clear();
+    }
+
 
 }
 

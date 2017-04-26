@@ -60,7 +60,7 @@ public class MetricInfoEndpoint implements Endpoint
         final AtomicInteger count = new AtomicInteger(0);
         try
         {
-            count.set(metricsDao.list(guid,null,null).getMetricsEntries().size());
+            count.set(metricsDao.list(guid,null,null).size());
         } catch (SQLException e)
         {
             e.printStackTrace();

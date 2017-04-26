@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.metrics.CounterService;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Aspect
 @Component
 public class MetricsApiAfterReturningAspects
@@ -24,13 +26,19 @@ public class MetricsApiAfterReturningAspects
             returning= "response")
     public void afterReturning(JoinPoint joinPoint, Object response)
     {
+        final String operation = joinPoint.getSignature().getName();
         if(response instanceof BaseMetricsResponse)
         {
             final BaseMetricsResponse baseMetricsResponse = (BaseMetricsResponse)response;
-            LOGGER.info("Operation={} GUID={} Status={} Message={} ",joinPoint.getSignature().getName(),baseMetricsResponse.getGuid(),
+            LOGGER.info("Provider=AOP Operation={} GUID={} Status={} Message={} ",operation,baseMetricsResponse.getGuid(),
                     baseMetricsResponse.getStatus(),baseMetricsResponse.getMessage());
             final String counterString = String.format("counter.%s.%s.%s",joinPoint.getSignature().getName(),baseMetricsResponse.getGuid(), baseMetricsResponse.getStatus());
             counterService.increment(counterString);
+        }
+        if(response instanceof List || response instanceof Integer)
+        {
+            final Integer size = (response instanceof List) ? ((List)response).size() : (Integer)response;
+            LOGGER.info("Provider=AOP Operation={} ReturnedResults={}",operation,size);
         }
     }
 

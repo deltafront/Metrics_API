@@ -5,7 +5,6 @@ import companyB.metrics.api.contract.MetricsApiStatus;
 import companyB.metrics.api.contract.get.GetMetricResponse;
 import companyB.metrics.api.contract.register.RegisterMetricRequest;
 import companyB.metrics.api.model.Metric;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,11 +23,6 @@ public class GetMetricTests extends MetricTestBase
         guid = metricApiService.register(added).getGuid();
     }
 
-    @After
-    public void after()
-    {
-        metricApiService.delete(guid);
-    }
     @Test
     public void happyPath()
     {
